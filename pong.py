@@ -12,9 +12,17 @@ from pyglet.gl import *
 BOARD_WIDTH = 800
 BOARD_HEIGHT = 300
 
+label = pyglet.text.Label('Hello, world!',
+                    font_name='Arial',
+                    font_size=14,
+                    x=50,
+                    y=50,
+                    )
+
 ####################################################################################
-# Setup
+# Setup State
 ####################################################################################
+#region
 class Direction(Enum):
     Still = 0
     Up = 1
@@ -29,13 +37,6 @@ class Board():
 
 class Visuals():
     def __init__(self):
-        self.label = pyglet.text.Label('Hello, world!',
-                          font_name='Arial',
-                          font_size=36,
-                          x=window.width // 2,
-                          y=window.height // 2,
-                          anchor_x='center',
-                          anchor_y='center')
         return
 
 class Player():
@@ -54,17 +55,12 @@ class State():
 
 def initGameState():
     return State()
-
-def initScreen(state,window):
-    window.set_size(state.board.width,state.board.height) 
-    window.set_minimum_size(state.board.width,state.board.height)
-    window.set_maximum_size(state.board.width,state.board.height)
-    return
+#endregion
 
 ####################################################################################
-# Drawing
+# Drawing Utilities
 ####################################################################################
-
+#region
 def drawBox(left,top,right,bottom,color):
     glBegin(GL_QUADS)
     glColor3f(((color & 0xFF0000)>>16) / 255.0,((color & 0x00FF00)>>8) / 255.0,(color & 0x0000FF) / 255.0)
@@ -75,15 +71,19 @@ def drawBox(left,top,right,bottom,color):
     glEnd()
 
 
+#endregion
+
+####################################################################################
+# Drawing Utilities
+####################################################################################
+
 def drawState(state):
-    glClear(GL_COLOR_BUFFER_BIT)
     drawBox(100,state.player1.position,200,state.player1.position+100,color = 0xFF0000)
     drawBox(300,100,400,200,color = 0x0088FF)
-    state.visuals.label.draw()
+    label.draw()
     return
 
 
-    
 ####################################################################################
 # Game Logic
 ####################################################################################
@@ -116,6 +116,12 @@ def checkInput(state,keys):
 ####################################################################################
 # Initialization
 ####################################################################################
+def resizeScreen(state,window):
+    window.set_size(state.board.width,state.board.height) 
+    window.set_minimum_size(state.board.width,state.board.height)
+    window.set_maximum_size(state.board.width,state.board.height)
+    return
+
 def initLogging(state):
     logger = logging.getLogger(__file__)
     hdlr = logging.FileHandler(__file__ + ".log","w+")
@@ -147,10 +153,8 @@ def on_draw():
     window.clear()
     drawState(state)
 
-
-
 state = initGameState()
-initScreen(state,window)
+resizeScreen(state,window)
 initLogging(state)
 
 
