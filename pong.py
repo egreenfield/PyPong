@@ -2,6 +2,8 @@
 import pyglet
 import logging
 from pyglet.window import key
+from enum import Enum
+from pyglet.gl import *
 
 ####################################################################################
 # CONSTANTS
@@ -13,6 +15,12 @@ BOARD_HEIGHT = 300
 ####################################################################################
 # Setup
 ####################################################################################
+class Direction(Enum):
+    Still = 0
+    Up = 1
+    Down = 2
+    Left = 3
+    Right = 4
 
 class Board():
     def __init__(self):
@@ -30,11 +38,18 @@ class Visuals():
                           anchor_y='center')
         return
 
+class Player():
+    def __init__(self):
+        self.direction = Direction.Still
+        self.position = 0
+
 class State():
     def __init__(self):
         self.board = Board()
         self.visuals = Visuals()
         self.logger = None
+        self.player1 = Player()
+
 
 
 def initGameState():
@@ -42,13 +57,28 @@ def initGameState():
 
 def initScreen(state,window):
     window.set_size(state.board.width,state.board.height) 
+    window.set_minimum_size(state.board.width,state.board.height)
+    window.set_maximum_size(state.board.width,state.board.height)
     return
 
 ####################################################################################
 # Drawing
 ####################################################################################
 
+def drawBox(left,top,right,bottom,color):
+    glBegin(GL_QUADS)
+    glColor3f(((color & 0xFF0000)>>16) / 255.0,((color & 0x00FF00)>>8) / 255.0,(color & 0x0000FF) / 255.0)
+    glVertex3f(left,top,0)
+    glVertex3f(right,top,0)
+    glVertex3f(right,bottom,0)
+    glVertex3f(left,bottom,0)
+    glEnd()
+
+
 def drawState(state):
+    glClear(GL_COLOR_BUFFER_BIT)
+    drawBox(100,state.player1.position,200,state.player1.position+100,color = 0xFF0000)
+    drawBox(300,100,400,200,color = 0x0088FF)
     state.visuals.label.draw()
     return
 
@@ -58,12 +88,25 @@ def drawState(state):
 # Game Logic
 ####################################################################################
 
+def updatePlayerPosition(player):
+    if(player.direction == Direction.Down):
+        player.position -= .5
+    elif(player.direction == Direction.Up):
+        player.position += .5
+
 def updateState(state,dt):
+    updatePlayerPosition(state.player1)
     return
 
 def checkInput(state,keys):
-    return
 
+    if(keys[key.S]):
+        state.player1.direction = Direction.Down
+    elif(keys[key.W]):
+        state.player1.direction = Direction.Up
+    else:
+        state.player1.direction = Direction.Still
+    return
 
 ####################################################################################
 # Messy Initialization stuff
